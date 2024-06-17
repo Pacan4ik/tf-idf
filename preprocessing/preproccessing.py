@@ -1,3 +1,4 @@
+import nltk
 from nltk.tokenize import word_tokenize
 import re
 import string
@@ -41,6 +42,7 @@ def text_extraction(path):
 
 
 def delete_stop_words(text):
+    nltk.download('punkt')
     words = word_tokenize(text)  # Привести к нижнему регистру и токенизировать
     filtered_words = [word for word in words if word not in stop_words and word not in punctuation]
     return " ".join(filtered_words)
