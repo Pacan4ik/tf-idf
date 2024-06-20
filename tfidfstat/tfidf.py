@@ -1,9 +1,12 @@
 import re
 import math
-from tfidfstat import lexicon
+
+from preprocessing.preproccessing import Article
+from tfidfstat.lexicon import Lexicon
+from typing import List, Tuple
 
 
-def tf(text: str):
+def tf(text: str) -> Lexicon:
     """
     Calculate term frequency (TF) for a given text.
 
@@ -19,40 +22,44 @@ def tf(text: str):
     if not isinstance(text, str):
         raise TypeError('text must be a string')
     words = re.findall(r'\b\w+\b', text)
-    lex = lexicon.Lexicon(words)
+    lex = Lexicon(words)
     return lex
 
 
-def tfidf(texts: []):
+def tfidf(articles: List[Article]) -> List[Tuple[Article, dict]]:
     """
-       Calculate TF-IDF (Term Frequency-Inverse Document Frequency) for a list of texts.
+       Calculate TF-IDF (Term Frequency-Inverse Document Frequency) for a list of Article objects.
 
-       :param texts: A list of strings, where each string represents a document.
-       :return: A list of dictionaries, where each dictionary contains TF-IDF scores for words in the corresponding document.
+       :param articles: A list of Article objects, where each Article represents a document.
+       :return: A list of tuples, where each tuple contains an Article object and a dictionary with TF-IDF scores
+        for words in the corresponding document.
 
        Raises:
-           TypeError: If the input texts are not provided as a list.
+        TypeError: If the input is not provided as a list of Article objects.
+        UserWarning: If the list of articles contains fewer than 2 elements.
 
-       The function calculates TF-IDF scores for each word in each document within the provided list of texts.
+       The function calculates TF-IDF scores for each word in each document within the provided list of articles.
        TF-IDF scores are computed as TF * IDF, where:
        - TF (Term Frequency) measures how frequently a word appears in a document.
        - IDF (Inverse Document Frequency) measures how important a word is across all documents.
        """
-    if not isinstance(texts, list):
-        raise TypeError('texts must be a list')
-    data = [tf(text) for text in texts]
+    if not isinstance(articles, list) or not all(isinstance(article, Article) for article in articles):
+        raise TypeError('articles must be a list of Article objects')
+    if len(articles) < 2:
+        raise UserWarning('articles must contain at least 2 elements')
+    data = [(article, tf(article.file_text)) for article in articles]
     res = []
     idf_cache = {}
-    for stat in data:
+    for article, stat in data:
         tfidfs = {}
         for word, values in stat:
             _, tf_value = values
             if word not in idf_cache:
-                doc_count = sum(1 for other_stat in data if word in other_stat)
-                idf = math.log(len(texts) / doc_count, 10)
+                doc_count = sum(1 for other_article, other_stat in data if word in other_stat)
+                idf = math.log(len(articles) / doc_count, 1.5)
                 idf_cache[word] = idf
             else:
                 idf = idf_cache[word]
             tfidfs[word] = tf_value * idf
-        res.append(tfidfs)
+        res.append((article, tfidfs))
     return res
