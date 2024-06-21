@@ -3,10 +3,7 @@ import math
 from preprocessing.preproccessing import Article
 from tfidfstat.lexicon import Lexicon
 from typing import List, Tuple
-import spacy
-
-nlp = spacy.load('ru_core_news_sm')
-nlp.add_pipe("merge_hyphenated_tokens", before="parser")
+from utils import spacysingle
 
 
 def tf(text: str) -> Lexicon:
@@ -25,13 +22,11 @@ def tf(text: str) -> Lexicon:
     if not isinstance(text, str):
         raise TypeError('text must be a string')
     pattern = re.compile(r'^[а-яА-ЯёЁ]+-?[а-яА-ЯёЁ]+$')
+    nlp = spacysingle.SpacyNlp.get_instance()
     doc = nlp(text)
     prev_pos = 'NAN'
     prev_text = ''
     terms = []
-
-    # for token in doc:
-    #     print(token.text)
 
     for token in doc:
         if pattern.match(token.text):
