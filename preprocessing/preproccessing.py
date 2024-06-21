@@ -1,4 +1,3 @@
-from nltk import RegexpTokenizer
 from nltk.tokenize import word_tokenize
 import re
 import nltk
