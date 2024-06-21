@@ -5,8 +5,14 @@ import string
 import spacy
 import os
 import docx
+import sys
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer
+
+if getattr(sys, 'frozen', False):
+    application_path = sys._MEIPASS + '/'
+else:
+    application_path = ""
 
 
 # Класс для представления статей
@@ -20,12 +26,12 @@ class Article:
 
 
 # Загрузка стоп-слов и пунктуации
-with open('data/stopwords_all.txt', 'r', encoding='utf-8') as file1:
+with open(application_path + 'data/stopwords_all.txt', 'r', encoding='utf-8') as file1:
     stop_words = set(file1.read().splitlines())
 nltk.download('punkt')
 punctuation = string.punctuation
 # Загрузка языковой модели spaCy
-nlp = spacy.load("ru_core_news_sm")
+nlp = spacy.load(application_path + 'ru_core_news_sm')
 
 
 def text_extraction(path):
