@@ -21,7 +21,7 @@ def tf(text: str) -> Lexicon:
     """
     if not isinstance(text, str):
         raise TypeError('text must be a string')
-    pattern = re.compile(r'^[а-яА-ЯёЁ]+-?[а-яА-ЯёЁ]+$')
+    pattern = re.compile(r'^[а-яА-ЯёЁ]{3,}-?[а-яА-ЯёЁ]{3,}$')
     nlp = spacysingle.SpacyNlp.get_instance()
     doc = nlp(text)
     prev_pos = 'NAN'
@@ -76,7 +76,7 @@ def tfidf(articles: List[Article]) -> List[Tuple[Article, dict]]:
             _, tf_value = values
             if word not in idf_cache:
                 doc_count = sum(1 for other_article, other_stat in data if word in other_stat)
-                idf = math.log(len(articles) / doc_count, 1.5)
+                idf = math.log(len(articles) / doc_count, 1.1)
                 idf_cache[word] = idf
             else:
                 idf = idf_cache[word]

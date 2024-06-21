@@ -45,8 +45,8 @@ def text_extraction(path):
                     for element in page:
                         if isinstance(element, LTTextContainer):
                             s = (element.get_text().replace('-\n', '')
-                                 .replace(' - ', '')
-                                 .replace('\n', '').lower()
+                                 .replace(' - ', ' ')
+                                 .replace('\n', ' ').lower()
                                  .replace('ё', 'е'))
                             extracted_text_array[c].file_text += str(s + " ")
 
