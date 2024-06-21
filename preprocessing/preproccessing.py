@@ -8,6 +8,7 @@ import os
 import sys
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer
+from spacy import Language, util
 
 if getattr(sys, 'frozen', False):
     application_path = sys._MEIPASS + '/'
@@ -34,6 +35,22 @@ punctuation = string.punctuation
 nlp = spacy.load(application_path + 'ru_core_news_sm')
 
 
+@Language.component("merge_hyphenated_tokens")
+def merge_hyphenated_tokens(doc):
+    spans = []
+    for i, token in enumerate(doc[:-1]):
+        if token.text == '-' and doc[i + 1].text and doc[i - 1].text:
+            spans.append(doc[i - 1:i + 2])
+    spans = util.filter_spans(spans)
+    with doc.retokenize() as retokenizer:
+        for span in spans:
+            retokenizer.merge(span)
+    return doc
+
+
+nlp.add_pipe("merge_hyphenated_tokens", before="parser")
+
+
 def text_extraction(path):
     extracted_text_array = []
     c = 0
@@ -45,10 +62,13 @@ def text_extraction(path):
             for pagenum, page in enumerate(extract_pages(filename.path)):
                 for element in page:
                     if isinstance(element, LTTextContainer):
-                        s = element.get_text().replace('-\n', '').replace('\n', '').lower().replace('ё', 'е')
+                        s = (element.get_text().replace('-\n', '')
+                             .replace(' - ', '')
+                             .replace('\n', '').lower()
+                             .replace('ё', 'е'))
                         extracted_text_array[c].file_text += str(s + " ")
 
-        extracted_text_array[c].file_text = re.sub(r'[\d!\"#$%&\'()*+,./:;<=>?@\[\]^_`{|}~]', ' ',
+        extracted_text_array[c].file_text = re.sub(r'[\d!\"#$%&\'()*+/<=>?@\[\]^_`{|}~]', ' ',
                                                    extracted_text_array[c].file_text)
         extracted_text_array[c].file_text = lemmatize(delete_stop_words(extracted_text_array[c].file_text))
 
@@ -59,11 +79,11 @@ def text_extraction(path):
 
 def delete_stop_words(text):
     words = word_tokenize(text)  # Привести к нижнему регистру и токенизировать
-    filtered_words = [word for word in words if word not in stop_words and word not in punctuation]
+    filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
     return " ".join(filtered_words)
 
 
 def lemmatize(text):
     doc = nlp(text)  # Лемматизируем текст
-    lemmatized_words = [token.lemma_ for token in doc if token.text not in punctuation and token.text not in stop_words]
+    lemmatized_words = [token.lemma_ for token in doc if token.text not in stop_words]
     return " ".join(lemmatized_words)

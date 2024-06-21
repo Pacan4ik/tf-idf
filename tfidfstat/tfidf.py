@@ -1,9 +1,12 @@
 import re
 import math
-
 from preprocessing.preproccessing import Article
 from tfidfstat.lexicon import Lexicon
 from typing import List, Tuple
+import spacy
+
+nlp = spacy.load('ru_core_news_sm')
+nlp.add_pipe("merge_hyphenated_tokens", before="parser")
 
 
 def tf(text: str) -> Lexicon:
@@ -21,8 +24,30 @@ def tf(text: str) -> Lexicon:
     """
     if not isinstance(text, str):
         raise TypeError('text must be a string')
-    words = re.findall(r'\b\w+\b', text)
-    lex = Lexicon(words)
+    pattern = re.compile(r'^[а-яА-ЯёЁ]+-?[а-яА-ЯёЁ]+$')
+    doc = nlp(text)
+    prev_pos = 'NAN'
+    prev_text = ''
+    terms = []
+
+    # for token in doc:
+    #     print(token.text)
+
+    for token in doc:
+        if pattern.match(token.text):
+            terms.append(token.text)
+            if token.pos_ == 'NOUN' and prev_pos == 'ADJ':
+                terms.append(prev_text + ' ' + token.text)
+            prev_pos = token.pos_
+            prev_text = token.text
+        elif token.pos_ == 'PUNCT':
+            prev_pos = token.pos_
+            prev_text = token.text
+        else:
+            prev_pos = 'NAN'
+            prev_text = ''
+
+    lex = Lexicon(terms)
     return lex
 
 
