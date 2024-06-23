@@ -21,7 +21,7 @@ class Article:
 
 
 # Загрузка стоп-слов и пунктуации
-with open(apppath.get_app_path() + 'data/stopwords_all.txt', 'r', encoding='utf-8') as file1:
+with open(apppath.get_stopwords_path(), 'r', encoding='utf-8') as file1:
     stop_words = set(file1.read().splitlines())
 
 tokenizer_path = apppath.get_app_path() + 'data/nltk'
