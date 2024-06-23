@@ -7,6 +7,7 @@ import docx
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LTTextContainer
 from utils import apppath, spacysingle
+import pymupdf
 
 
 # Класс для представления статей
@@ -41,14 +42,22 @@ def text_extraction(path):
                     s = paragraph.text.replace('-\n', '').replace('\n', '').lower().replace('ё', 'е')
                     extracted_text_array[c].file_text += str(s + " ")
             else:
-                for pagenum, page in enumerate(extract_pages(filename.path)):
-                    for element in page:
-                        if isinstance(element, LTTextContainer):
-                            s = (element.get_text().replace('-\n', '')
-                                 .replace(' - ', ' ')
-                                 .replace('\n', ' ').lower()
-                                 .replace('ё', 'е'))
-                            extracted_text_array[c].file_text += str(s + " ")
+                # for pagenum, page in enumerate(extract_pages(filename.path)):
+                #     for element in page:
+                #         if isinstance(element, LTTextContainer):
+                #             s = (element.get_text().replace('-\n', '')
+                #                  .replace(' - ', ' ')
+                #                  .replace('\n', ' ').lower()
+                #                  .replace('ё', 'е'))
+                #             extracted_text_array[c].file_text += str(s + " ")
+                doc = pymupdf.open(filename.path)
+                for page_num in range(len(doc)):
+                    page = doc.load_page(page_num)
+                    s = (page.get_text("text").replace('-\n', '')
+                         .replace(' - ', ' ')
+                         .replace('\n', ' ').lower()
+                         .replace('ё', 'е'))
+                    extracted_text_array[c].file_text += str(s + " ")
 
         extracted_text_array[c].file_text = re.sub(r'[\d!\"#$%&\'()*+/<=>?@\[\]^_`{|}~]', ' ',
                                                    extracted_text_array[c].file_text)

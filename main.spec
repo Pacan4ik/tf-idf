@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('data','data'), ('.venv/Lib/site-packages/ru_core_news_sm/ru_core_news_sm-3.7.0', 'ru_core_news_sm')],
+    datas=[('data','data'), ('.venv/Lib/site-packages/ru_core_news_lg/ru_core_news_lg-3.7.0', 'ru_core_news_lg')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

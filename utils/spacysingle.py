@@ -9,8 +9,8 @@ class SpacyNlp:
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
-            nlp = spacy.load(apppath.get_app_path() + 'ru_core_news_sm')
-            nlp.add_pipe("merge_hyphenated_tokens", before="parser")
+            nlp = spacy.load(apppath.get_app_path() + 'ru_core_news_lg')
+            #nlp.add_pipe("merge_hyphenated_tokens", before="parser")
             cls._instance = nlp
         return cls._instance
 
