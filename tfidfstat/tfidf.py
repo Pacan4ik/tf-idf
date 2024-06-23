@@ -1,9 +1,9 @@
 import re
 import math
-
 from preprocessing.preproccessing import Article
 from tfidfstat.lexicon import Lexicon
 from typing import List, Tuple
+from utils import spacysingle
 
 
 def tf(text: str) -> Lexicon:
@@ -21,8 +21,28 @@ def tf(text: str) -> Lexicon:
     """
     if not isinstance(text, str):
         raise TypeError('text must be a string')
-    words = re.findall(r'\b\w+\b', text)
-    lex = Lexicon(words)
+    pattern = re.compile(r'^[а-яА-ЯёЁ]{3,}-?[а-яА-ЯёЁ]{3,}$')
+    nlp = spacysingle.SpacyNlp.get_instance()
+    doc = nlp(text)
+    prev_pos = 'NAN'
+    prev_text = ''
+    terms = []
+
+    for token in doc:
+        if pattern.match(token.text):
+            terms.append(token.text)
+            if token.pos_ == 'NOUN' and prev_pos == 'ADJ':
+                terms.append(prev_text + ' ' + token.text)
+            prev_pos = token.pos_
+            prev_text = token.text
+        elif token.pos_ == 'PUNCT':
+            prev_pos = token.pos_
+            prev_text = token.text
+        else:
+            prev_pos = 'NAN'
+            prev_text = ''
+
+    lex = Lexicon(terms)
     return lex
 
 
@@ -56,7 +76,7 @@ def tfidf(articles: List[Article]) -> List[Tuple[Article, dict]]:
             _, tf_value = values
             if word not in idf_cache:
                 doc_count = sum(1 for other_article, other_stat in data if word in other_stat)
-                idf = math.log(len(articles) / doc_count, 1.5)
+                idf = math.log(len(articles) / doc_count, 1.1)
                 idf_cache[word] = idf
             else:
                 idf = idf_cache[word]

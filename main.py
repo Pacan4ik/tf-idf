@@ -16,6 +16,8 @@ def parse_arguments():
                         help='Путь для сохранения результатов (обязательно для форматов csv и xlsx).')
     parser.add_argument('--threshold', type=float, default=0.005,
                         help='Пороговое значение для фильтрации TF-IDF значений.')
+    parser.add_argument('--limit', type=int, default=15,
+                        help='Количество выводимых терминов')
 
     arguments = parser.parse_args()
     if arguments.out_format in ['csv', 'xlsx'] and not arguments.output:
@@ -43,8 +45,8 @@ if __name__ == '__main__':
     file_name_stat = [(article.file_name, tfidf_dict) for article, tfidf_dict in res]
 
     if args.out_format == 'console':
-        md.print_table(file_name_stat, threshold=args.threshold)
+        md.print_table(file_name_stat, threshold=args.threshold, limit=args.limit)
     if args.out_format == 'csv':
-        excel_print.save_csv(file_name_stat, args.output, threshold=args.threshold)
+        excel_print.save_csv(file_name_stat, args.output, threshold=args.threshold, limit=args.limit)
     if args.out_format == 'xlsx':
-        excel_print.save_xlsx(file_name_stat, args.output, threshold=args.threshold)
+        excel_print.save_xlsx(file_name_stat, args.output, threshold=args.threshold, limit=args.limit)
